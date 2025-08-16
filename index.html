@@ -23,11 +23,6 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-        }
         .connection-status {
             display: inline-flex;
             align-items: center;
@@ -48,10 +43,12 @@
             background-color: #fef3c7;
             color: #d97706;
         }
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { font-size: 12px; }
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
         }
     </style>
 </head>
@@ -63,49 +60,71 @@
                 <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-database text-2xl text-white"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800">Konfigurasi Database</h2>
-                <p class="text-gray-600">Hubungkan aplikasi dengan Google Sheets</p>
+                <h2 class="text-2xl font-bold text-gray-800">Konfigurasi Database Google Sheets</h2>
+                <p class="text-gray-600">Hubungkan aplikasi dengan Google Sheets Anda</p>
             </div>
 
             <!-- Connection Status -->
             <div class="mb-6 text-center">
                 <div id="connectionStatus" class="connection-status status-disconnected">
                     <i class="fas fa-times-circle mr-2"></i>
-                    <span>Tidak Terhubung</span>
+                    <span>Belum Terhubung</span>
                 </div>
             </div>
             
             <form id="dbConfigForm" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Google Sheets ID *</label>
-                    <input type="text" id="spreadsheetId" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
-                    <p class="text-xs text-gray-500 mt-1">ID Spreadsheet dapat ditemukan di URL Google Sheets</p>
+                    <input type="text" id="spreadsheetId" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
+                    <p class="text-xs text-gray-500 mt-1">Ambil dari URL Google Sheets: docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key Google Sheets *</label>
-                    <input type="password" id="apiKey" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="AIzaSyD...">
-                    <p class="text-xs text-gray-500 mt-1">API Key dari Google Cloud Console</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Google Sheets API Key *</label>
+                    <div class="relative">
+                        <input type="password" id="apiKey" required class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="AIzaSyD...">
+                        <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i id="apiKeyToggleIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">API Key dari Google Cloud Console dengan akses Google Sheets API</p>
                 </div>
 
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-blue-800 mb-2">
-                        <i class="fas fa-info-circle mr-2"></i>Petunjuk Setup:
+                    <h4 class="font-semibold text-blue-800 mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Panduan Setup Lengkap:
                     </h4>
-                    <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-                        <li>Buat Google Sheets baru atau gunakan yang sudah ada</li>
-                        <li>Buat sheet dengan nama: "income", "expenses", "members", "activities", "articles", "donations"</li>
-                        <li>Set sharing ke "Anyone with the link can view"</li>
-                        <li>Dapatkan API Key dari Google Cloud Console</li>
-                        <li>Enable Google Sheets API di project Anda</li>
-                    </ol>
+                    <div class="text-sm text-blue-700 space-y-2">
+                        <div class="font-medium">1. Buat Google Sheets:</div>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Buka <a href="https://sheets.google.com" target="_blank" class="underline">Google Sheets</a></li>
+                            <li>Buat spreadsheet baru dengan nama "Masjid Al-Barokah Database"</li>
+                            <li>Buat 6 sheet dengan nama: <code class="bg-blue-100 px-1 rounded">income</code>, <code class="bg-blue-100 px-1 rounded">expenses</code>, <code class="bg-blue-100 px-1 rounded">members</code>, <code class="bg-blue-100 px-1 rounded">activities</code>, <code class="bg-blue-100 px-1 rounded">articles</code>, <code class="bg-blue-100 px-1 rounded">donations</code></li>
+                        </ul>
+                        
+                        <div class="font-medium mt-3">2. Setup Sharing:</div>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Klik tombol "Share" di kanan atas</li>
+                            <li>Ubah ke "Anyone with the link can view"</li>
+                            <li>Copy Spreadsheet ID dari URL</li>
+                        </ul>
+                        
+                        <div class="font-medium mt-3">3. Dapatkan API Key:</div>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a></li>
+                            <li>Buat project baru atau pilih yang ada</li>
+                            <li>Enable "Google Sheets API"</li>
+                            <li>Buat Credentials → API Key</li>
+                            <li>Restrict API Key hanya untuk Sheets API</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-yellow-800 mb-2">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Mode Demo:
+                    <h4 class="font-semibold text-yellow-800 mb-2 flex items-center">
+                        <i class="fas fa-play-circle mr-2"></i>Mode Demo Tersedia:
                     </h4>
-                    <p class="text-sm text-yellow-700 mb-3">Jika tidak memiliki API Key, Anda dapat menggunakan mode demo dengan data sample.</p>
+                    <p class="text-sm text-yellow-700 mb-3">Jika belum siap dengan Google Sheets, gunakan mode demo dengan data contoh untuk mencoba aplikasi.</p>
                     <button type="button" onclick="useDemoMode()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
                         <i class="fas fa-play mr-2"></i>Gunakan Mode Demo
                     </button>
@@ -121,14 +140,16 @@
                 </div>
             </form>
 
-            <!-- Sample Spreadsheet Template -->
+            <!-- Template Link -->
             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h4 class="font-semibold text-gray-800 mb-2">Template Spreadsheet:</h4>
-                <a href="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/copy" target="_blank" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm">
-                    <i class="fas fa-external-link-alt mr-2"></i>
-                    Salin Template Spreadsheet
-                </a>
-                <p class="text-xs text-gray-500 mt-1">Klik link di atas untuk menyalin template spreadsheet yang sudah siap pakai</p>
+                <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                    <i class="fas fa-download mr-2"></i>Template Spreadsheet:
+                </h4>
+                <button onclick="createSampleSpreadsheet()" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm font-medium">
+                    <i class="fas fa-magic mr-2"></i>
+                    Auto-Setup Spreadsheet Template
+                </button>
+                <p class="text-xs text-gray-500 mt-1">Klik untuk membuat struktur sheet otomatis (memerlukan API Key yang valid)</p>
             </div>
         </div>
     </div>
@@ -156,7 +177,6 @@
                         </div>
                         <a href="#beranda" class="text-gray-700 hover:text-emerald-600 transition-colors">Beranda</a>
                         <a href="#kegiatan" class="text-gray-700 hover:text-emerald-600 transition-colors">Kegiatan</a>
-                        <a href="#artikel" class="text-gray-700 hover:text-emerald-600 transition-colors">Artikel</a>
                         <a href="#donasi" class="text-gray-700 hover:text-emerald-600 transition-colors">Donasi</a>
                         <button onclick="showLoginModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login Admin
@@ -172,7 +192,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div class="text-white">
                         <h1 class="text-5xl font-bold mb-6">Selamat Datang di<br>Masjid Al-Barokah</h1>
-                        <p class="text-xl mb-8 text-emerald-100">Sistem manajemen masjid terintegrasi dengan Google Sheets untuk transparansi dan kemudahan pengelolaan data.</p>
+                        <p class="text-xl mb-8 text-emerald-100">Sistem manajemen masjid terintegrasi dengan Google Sheets untuk transparansi dan kemudahan pengelolaan data keuangan.</p>
                         <div class="flex flex-col sm:flex-row gap-4">
                             <button onclick="scrollToSection('kegiatan')" class="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-calendar mr-2"></i>Lihat Kegiatan
@@ -216,8 +236,8 @@
         <section class="py-16 bg-white">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Data Real-time dari Spreadsheet</h2>
-                    <p class="text-gray-600">Data diperbarui secara otomatis dari Google Sheets</p>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Data Real-time dari Google Sheets</h2>
+                    <p class="text-gray-600">Data keuangan diperbarui secara otomatis dan transparan</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div class="text-center">
@@ -256,18 +276,18 @@
             </div>
         </section>
 
-        <!-- Activities from Spreadsheet -->
+        <!-- Activities Section -->
         <section id="kegiatan" class="py-16 bg-gray-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Kegiatan Terbaru</h2>
-                    <p class="text-gray-600 max-w-2xl mx-auto">Data kegiatan langsung dari spreadsheet yang dikelola pengurus masjid</p>
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Kegiatan Masjid</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Kegiatan dan program masjid yang dikelola secara transparan</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="activitiesList">
                     <div class="text-center py-12">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                        <p class="text-gray-500">Memuat data dari spreadsheet...</p>
+                        <p class="text-gray-500">Memuat data kegiatan...</p>
                     </div>
                 </div>
             </div>
@@ -277,8 +297,8 @@
         <section id="donasi" class="py-16 bg-emerald-50">
             <div class="container mx-auto px-4">
                 <div class="max-w-4xl mx-auto text-center">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Donasi Terintegrasi</h2>
-                    <p class="text-gray-600 mb-12 max-w-2xl mx-auto">Donasi Anda akan langsung tercatat di spreadsheet untuk transparansi penuh</p>
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">Donasi Transparan</h2>
+                    <p class="text-gray-600 mb-12 max-w-2xl mx-auto">Setiap donasi langsung tercatat di Google Sheets untuk transparansi penuh kepada jamaah</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-8 rounded-2xl">
@@ -339,7 +359,7 @@
                             <p><i class="fas fa-eye mr-2"></i>Laporan Transparan</p>
                             <p><i class="fas fa-shield-alt mr-2"></i>Audit Trail</p>
                             <button onclick="showSpreadsheetLink()" class="text-emerald-400 hover:text-emerald-300 text-sm">
-                                <i class="fas fa-external-link-alt mr-1"></i>Lihat Spreadsheet
+                                <i class="fas fa-external-link-alt mr-1"></i>Lihat Google Sheets
                             </button>
                         </div>
                     </div>
@@ -384,18 +404,18 @@
         <!-- Admin Navigation -->
         <nav class="bg-emerald-700 text-white">
             <div class="container mx-auto px-4">
-                <div class="flex space-x-1 overflow-x-auto" id="adminNavigationMenu">
+                <div class="flex space-x-1 overflow-x-auto">
                     <button onclick="showAdminSection('dashboard')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap active bg-emerald-600">
                         <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                    </button>
-                    <button onclick="showAdminSection('spreadsheet')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap">
-                        <i class="fas fa-table mr-2"></i>Spreadsheet
                     </button>
                     <button onclick="showAdminSection('income')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap">
                         <i class="fas fa-arrow-up mr-2"></i>Pemasukan
                     </button>
                     <button onclick="showAdminSection('expense')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap">
                         <i class="fas fa-arrow-down mr-2"></i>Pengeluaran
+                    </button>
+                    <button onclick="showAdminSection('donations')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap">
+                        <i class="fas fa-heart mr-2"></i>Donasi
                     </button>
                     <button onclick="showAdminSection('sync')" class="admin-nav-btn px-6 py-3 hover:bg-emerald-600 transition-colors whitespace-nowrap">
                         <i class="fas fa-sync mr-2"></i>Sinkronisasi
@@ -416,7 +436,7 @@
                             </div>
                             <i class="fas fa-wallet text-3xl text-emerald-600"></i>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Dari spreadsheet: <span id="balanceSheetUpdate">-</span></p>
+                        <p class="text-xs text-gray-500 mt-2">Update: <span id="balanceSheetUpdate">-</span></p>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center justify-between">
@@ -426,7 +446,7 @@
                             </div>
                             <i class="fas fa-arrow-up text-3xl text-green-600"></i>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Dari spreadsheet: <span id="incomeSheetUpdate">-</span></p>
+                        <p class="text-xs text-gray-500 mt-2">Update: <span id="incomeSheetUpdate">-</span></p>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center justify-between">
@@ -436,7 +456,7 @@
                             </div>
                             <i class="fas fa-arrow-down text-3xl text-red-600"></i>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Dari spreadsheet: <span id="expenseSheetUpdate">-</span></p>
+                        <p class="text-xs text-gray-500 mt-2">Update: <span id="expenseSheetUpdate">-</span></p>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center justify-between">
@@ -446,113 +466,29 @@
                             </div>
                             <i class="fas fa-users text-3xl text-blue-600"></i>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Dari spreadsheet: <span id="membersSheetUpdate">-</span></p>
+                        <p class="text-xs text-gray-500 mt-2">Update: <span id="membersSheetUpdate">-</span></p>
                     </div>
                 </div>
 
-                <!-- Sync Status -->
+                <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-lg font-semibold mb-4">Status Sinkronisasi</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Pemasukan</p>
-                                <p class="text-xs text-gray-500" id="incomeSyncStatus">Belum disinkronkan</p>
-                            </div>
-                            <button onclick="syncSheet('income')" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-sync"></i>
-                            </button>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Pengeluaran</p>
-                                <p class="text-xs text-gray-500" id="expenseSyncStatus">Belum disinkronkan</p>
-                            </div>
-                            <button onclick="syncSheet('expenses')" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-sync"></i>
-                            </button>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Jamaah</p>
-                                <p class="text-xs text-gray-500" id="membersSyncStatus">Belum disinkronkan</p>
-                            </div>
-                            <button onclick="syncSheet('members')" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-sync"></i>
-                            </button>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Donasi</p>
-                                <p class="text-xs text-gray-500" id="donationsSyncStatus">Belum disinkronkan</p>
-                            </div>
-                            <button onclick="syncSheet('donations')" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-sync"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mt-4 text-center">
-                        <button onclick="syncAllSheets()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-sync mr-2"></i>Sinkronkan Semua
+                    <h3 class="text-lg font-semibold mb-4">Aksi Cepat</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <button onclick="showAddIncomeModal()" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg transition-colors">
+                            <i class="fas fa-plus-circle text-2xl mb-2"></i>
+                            <p class="font-semibold">Tambah Pemasukan</p>
                         </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spreadsheet Management -->
-            <div id="spreadsheet" class="admin-section hidden">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-xl font-semibold">Manajemen Spreadsheet</h3>
-                            <p class="text-gray-600 text-sm">Kelola koneksi dan struktur Google Sheets</p>
-                        </div>
-                        <button onclick="openSpreadsheet()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-external-link-alt mr-2"></i>Buka Spreadsheet
+                        <button onclick="showAddExpenseModal()" class="bg-red-600 hover:bg-red-700 text-white p-4 rounded-lg transition-colors">
+                            <i class="fas fa-minus-circle text-2xl mb-2"></i>
+                            <p class="font-semibold">Tambah Pengeluaran</p>
                         </button>
-                    </div>
-
-                    <!-- Connection Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-2">Informasi Koneksi</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><strong>Spreadsheet ID:</strong> <span id="currentSpreadsheetId" class="font-mono text-xs">-</span></p>
-                                <p><strong>Status:</strong> <span id="currentConnectionStatus">-</span></p>
-                                <p><strong>Terakhir Sync:</strong> <span id="lastSyncTime">-</span></p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-2">Statistik Sheet</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><strong>Total Sheets:</strong> <span id="totalSheets">-</span></p>
-                                <p><strong>Total Records:</strong> <span id="totalRecords">-</span></p>
-                                <p><strong>Ukuran Data:</strong> <span id="dataSize">-</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sheet Structure -->
-                    <div class="mb-6">
-                        <h4 class="font-semibold text-gray-800 mb-4">Struktur Sheet</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="sheetStructure">
-                            <!-- Sheet structure will be loaded here -->
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap gap-4">
-                        <button onclick="validateSheetStructure()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-check-double mr-2"></i>Validasi Struktur
+                        <button onclick="syncAllSheets()" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors">
+                            <i class="fas fa-sync text-2xl mb-2"></i>
+                            <p class="font-semibold">Sinkronkan Data</p>
                         </button>
-                        <button onclick="createMissingSheets()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-plus mr-2"></i>Buat Sheet Hilang
-                        </button>
-                        <button onclick="backupData()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-download mr-2"></i>Backup Data
-                        </button>
-                        <button onclick="showDbConfigModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-cog mr-2"></i>Ubah Konfigurasi
+                        <button onclick="openSpreadsheet()" class="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg transition-colors">
+                            <i class="fas fa-external-link-alt text-2xl mb-2"></i>
+                            <p class="font-semibold">Buka Spreadsheet</p>
                         </button>
                     </div>
                 </div>
@@ -581,14 +517,13 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sumber</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="incomeTableBody" class="bg-white divide-y divide-gray-200">
                                 <tr>
-                                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
                                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
-                                        Memuat data dari spreadsheet...
+                                        Memuat data dari Google Sheets...
                                     </td>
                                 </tr>
                             </tbody>
@@ -620,14 +555,53 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penerima</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="expenseTableBody" class="bg-white divide-y divide-gray-200">
                                 <tr>
-                                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
                                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
-                                        Memuat data dari spreadsheet...
+                                        Memuat data dari Google Sheets...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donations Management -->
+            <div id="donations" class="admin-section hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-semibold">Manajemen Donasi</h3>
+                            <p class="text-gray-600 text-sm">Donasi dari form publik tersimpan otomatis</p>
+                        </div>
+                        <button onclick="refreshDonations()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-refresh mr-2"></i>Refresh Data
+                        </button>
+                    </div>
+
+                    <!-- Donations List -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-auto">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="donationsTableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
+                                        Memuat data donasi...
                                     </td>
                                 </tr>
                             </tbody>
@@ -639,46 +613,51 @@
             <!-- Sync Management -->
             <div id="sync" class="admin-section hidden">
                 <div class="space-y-6">
-                    <!-- Sync Controls -->
+                    <!-- Sync Status -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold mb-4">Kontrol Sinkronisasi</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-3">Sinkronisasi Manual</h4>
-                                <div class="space-y-3">
-                                    <button onclick="syncSheet('income')" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-arrow-up mr-2"></i>Sync Pemasukan
-                                    </button>
-                                    <button onclick="syncSheet('expenses')" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-arrow-down mr-2"></i>Sync Pengeluaran
-                                    </button>
-                                    <button onclick="syncSheet('members')" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-users mr-2"></i>Sync Jamaah
-                                    </button>
-                                    <button onclick="syncSheet('donations')" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-heart mr-2"></i>Sync Donasi
-                                    </button>
+                        <h3 class="text-xl font-semibold mb-4">Status Sinkronisasi</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Pemasukan</p>
+                                    <p class="text-xs text-gray-500" id="incomeSyncStatus">Belum disinkronkan</p>
                                 </div>
+                                <button onclick="syncSheet('income')" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-sync"></i>
+                                </button>
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800 mb-3">Sinkronisasi Otomatis</h4>
-                                <div class="space-y-3">
-                                    <label class="flex items-center">
-                                        <input type="checkbox" id="autoSyncEnabled" class="mr-3" onchange="toggleAutoSync()">
-                                        <span>Aktifkan sinkronisasi otomatis</span>
-                                    </label>
-                                    <div class="flex items-center space-x-2">
-                                        <label class="text-sm">Interval:</label>
-                                        <select id="syncInterval" class="px-3 py-1 border border-gray-300 rounded">
-                                            <option value="30">30 detik</option>
-                                            <option value="60" selected>1 menit</option>
-                                            <option value="300">5 menit</option>
-                                            <option value="600">10 menit</option>
-                                        </select>
-                                    </div>
-                                    <p class="text-xs text-gray-500">Status: <span id="autoSyncStatus">Tidak aktif</span></p>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Pengeluaran</p>
+                                    <p class="text-xs text-gray-500" id="expenseSyncStatus">Belum disinkronkan</p>
                                 </div>
+                                <button onclick="syncSheet('expenses')" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-sync"></i>
+                                </button>
                             </div>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Donasi</p>
+                                    <p class="text-xs text-gray-500" id="donationsSyncStatus">Belum disinkronkan</p>
+                                </div>
+                                <button onclick="syncSheet('donations')" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Jamaah</p>
+                                    <p class="text-xs text-gray-500" id="membersSyncStatus">Belum disinkronkan</p>
+                                </div>
+                                <button onclick="syncSheet('members')" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="syncAllSheets()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-sync mr-2"></i>Sinkronkan Semua
+                            </button>
                         </div>
                     </div>
 
@@ -693,11 +672,12 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sheet</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Records</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durasi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="syncHistoryBody" class="bg-white divide-y divide-gray-200">
-                                    <!-- Sync history will be loaded here -->
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">Belum ada riwayat sinkronisasi</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -755,7 +735,7 @@
                     <i class="fas fa-heart text-2xl text-white"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">Form Donasi</h2>
-                <p class="text-gray-600">Donasi akan langsung tercatat di spreadsheet</p>
+                <p class="text-gray-600">Donasi akan langsung tercatat di Google Sheets</p>
             </div>
             
             <form id="donationForm" class="space-y-6">
@@ -804,21 +784,21 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran *</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="paymentMethod" value="transfer" class="mr-3">
+                            <input type="radio" name="paymentMethod" value="Transfer Bank" class="mr-3">
                             <div class="flex items-center">
                                 <i class="fas fa-university text-green-600 mr-2"></i>
                                 <span>Transfer Bank</span>
                             </div>
                         </label>
                         <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="paymentMethod" value="qris" class="mr-3">
+                            <input type="radio" name="paymentMethod" value="QRIS" class="mr-3">
                             <div class="flex items-center">
                                 <i class="fas fa-qrcode text-blue-600 mr-2"></i>
                                 <span>QRIS</span>
                             </div>
                         </label>
                         <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="paymentMethod" value="cash" class="mr-3">
+                            <input type="radio" name="paymentMethod" value="Tunai" class="mr-3">
                             <div class="flex items-center">
                                 <i class="fas fa-money-bill-wave text-yellow-600 mr-2"></i>
                                 <span>Tunai</span>
@@ -841,6 +821,10 @@
                     </button>
                 </div>
             </form>
+            
+            <button onclick="closeDonationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
     </div>
 
@@ -852,7 +836,7 @@
                     <i class="fas fa-arrow-up text-2xl text-white"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">Tambah Pemasukan</h2>
-                <p class="text-gray-600">Data akan disimpan ke spreadsheet</p>
+                <p class="text-gray-600">Data akan disimpan ke Google Sheets</p>
             </div>
             
             <form id="addIncomeForm" class="space-y-4">
@@ -893,10 +877,14 @@
                         Batal
                     </button>
                     <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
-                        <i class="fas fa-save mr-2"></i>Simpan ke Spreadsheet
+                        <i class="fas fa-save mr-2"></i>Simpan ke Sheets
                     </button>
                 </div>
             </form>
+            
+            <button onclick="closeAddIncomeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
     </div>
 
@@ -908,7 +896,7 @@
                     <i class="fas fa-arrow-down text-2xl text-white"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">Tambah Pengeluaran</h2>
-                <p class="text-gray-600">Data akan disimpan ke spreadsheet</p>
+                <p class="text-gray-600">Data akan disimpan ke Google Sheets</p>
             </div>
             
             <form id="addExpenseForm" class="space-y-4">
@@ -950,10 +938,14 @@
                         Batal
                     </button>
                     <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors">
-                        <i class="fas fa-save mr-2"></i>Simpan ke Spreadsheet
+                        <i class="fas fa-save mr-2"></i>Simpan ke Sheets
                     </button>
                 </div>
             </form>
+            
+            <button onclick="closeAddExpenseModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
     </div>
 
@@ -970,7 +962,7 @@
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div class="flex items-center mb-4">
                 <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
-                <h3 class="text-lg font-semibold text-gray-800">Berhasil</h3>
+                <h3 class="text-lg font-semibold text-gray-800">Berhasil!</h3>
             </div>
             <p id="successMessage" class="text-gray-600 mb-4"></p>
             <button onclick="closeSuccessModal()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors">
@@ -1005,7 +997,6 @@
             isConnected: false,
             isDemoMode: false
         };
-        let autoSyncInterval = null;
         let syncHistory = [];
 
         // Google Sheets API configuration
@@ -1044,7 +1035,7 @@
             ],
             donations: [
                 ['DN1734234567', 'Ahmad Santoso', '081234567890', 'Donasi Umum', 500000, 'Semoga bermanfaat', 'QRIS', 'Pending', new Date().toISOString()],
-                ['DN1734234568', 'Siti Nurhaliza', '081234567891', 'Pembangunan', 1000000, 'Untuk renovasi', 'Transfer', 'Verified', new Date().toISOString()]
+                ['DN1734234568', 'Siti Nurhaliza', '081234567891', 'Pembangunan', 1000000, 'Untuk renovasi', 'Transfer Bank', 'Verified', new Date().toISOString()]
             ]
         };
 
@@ -1095,6 +1086,19 @@
             });
         }
 
+        function toggleApiKeyVisibility() {
+            const apiKeyInput = document.getElementById('apiKey');
+            const toggleIcon = document.getElementById('apiKeyToggleIcon');
+            
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                apiKeyInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+
         // Database Configuration Functions
         function useDemoMode() {
             dbConfig.isDemoMode = true;
@@ -1105,15 +1109,15 @@
         }
 
         async function testConnection() {
-            const spreadsheetId = document.getElementById('spreadsheetId').value;
-            const apiKey = document.getElementById('apiKey').value;
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
 
             if (!spreadsheetId || !apiKey) {
                 showError('Harap isi Spreadsheet ID dan API Key');
                 return;
             }
 
-            showLoading('Menguji koneksi...');
+            showLoading('Menguji koneksi ke Google Sheets...');
             updateConnectionStatus('connecting', 'Menguji Koneksi...');
 
             try {
@@ -1125,7 +1129,8 @@
                     updateConnectionStatus('connected', 'Koneksi Berhasil');
                     showSuccess(`Koneksi berhasil! Spreadsheet: "${data.properties.title}"`);
                 } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
                 hideLoading();
@@ -1159,6 +1164,42 @@
             document.getElementById('dbConfigModal').classList.remove('hidden');
         }
 
+        async function createSampleSpreadsheet() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+
+            if (!apiKey || !spreadsheetId) {
+                showError('Harap isi API Key dan Spreadsheet ID terlebih dahulu');
+                return;
+            }
+
+            showLoading('Membuat struktur sheet...');
+
+            try {
+                // Test connection first
+                const testResponse = await fetch(`${SHEETS_API_BASE}/${spreadsheetId}?key=${apiKey}`);
+                if (!testResponse.ok) {
+                    throw new Error('Tidak dapat mengakses spreadsheet. Periksa ID dan API Key.');
+                }
+
+                // Create headers for each sheet
+                for (const [sheetName, headers] of Object.entries(REQUIRED_SHEETS)) {
+                    try {
+                        await writeSheet(sheetName, [headers], 'A1:Z1');
+                        console.log(`Created headers for ${sheetName}`);
+                    } catch (error) {
+                        console.warn(`Could not create headers for ${sheetName}:`, error.message);
+                    }
+                }
+
+                hideLoading();
+                showSuccess('Struktur sheet berhasil dibuat! Silakan refresh halaman dan test koneksi lagi.');
+            } catch (error) {
+                hideLoading();
+                showError(`Gagal membuat struktur: ${error.message}`);
+            }
+        }
+
         // Google Sheets API Functions
         async function readSheet(sheetName, range = '') {
             if (dbConfig.isDemoMode) {
@@ -1174,7 +1215,8 @@
             
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`Gagal membaca sheet: ${response.statusText}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `Gagal membaca sheet: ${response.statusText}`);
             }
             
             const data = await response.json();
@@ -1185,6 +1227,10 @@
             if (dbConfig.isDemoMode) {
                 // Simulate writing to demo data
                 if (!demoData[sheetName]) demoData[sheetName] = [];
+                if (range === 'A1:Z1') {
+                    // Writing headers, skip for demo
+                    return { updatedRows: 1 };
+                }
                 demoData[sheetName].push(...values);
                 return { updatedRows: values.length };
             }
@@ -1207,7 +1253,8 @@
             });
 
             if (!response.ok) {
-                throw new Error(`Gagal menulis ke sheet: ${response.statusText}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `Gagal menulis ke sheet: ${response.statusText}`);
             }
             
             return await response.json();
@@ -1237,7 +1284,8 @@
             });
 
             if (!response.ok) {
-                throw new Error(`Gagal menambah data ke sheet: ${response.statusText}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `Gagal menambah data ke sheet: ${response.statusText}`);
             }
             
             return await response.json();
@@ -1263,13 +1311,12 @@
                     time: new Date().toISOString(),
                     sheet: sheetName,
                     status: 'Success',
-                    records: data.length,
-                    duration: `${endTime - startTime}ms`
+                    records: data.length
                 });
                 
-                // Keep only last 50 sync records
-                if (syncHistory.length > 50) {
-                    syncHistory = syncHistory.slice(0, 50);
+                // Keep only last 20 sync records
+                if (syncHistory.length > 20) {
+                    syncHistory = syncHistory.slice(0, 20);
                 }
                 
                 updateSyncHistory();
@@ -1291,8 +1338,7 @@
                     time: new Date().toISOString(),
                     sheet: sheetName,
                     status: 'Error',
-                    records: 0,
-                    duration: error.message
+                    records: 0
                 });
                 
                 updateSyncHistory();
@@ -1325,27 +1371,14 @@
             }
         }
 
-        function toggleAutoSync() {
-            const enabled = document.getElementById('autoSyncEnabled').checked;
-            const interval = parseInt(document.getElementById('syncInterval').value) * 1000;
-            
-            if (enabled) {
-                autoSyncInterval = setInterval(() => {
-                    syncAllSheets();
-                }, interval);
-                document.getElementById('autoSyncStatus').textContent = `Aktif (${interval/1000}s)`;
-            } else {
-                if (autoSyncInterval) {
-                    clearInterval(autoSyncInterval);
-                    autoSyncInterval = null;
-                }
-                document.getElementById('autoSyncStatus').textContent = 'Tidak aktif';
-            }
-        }
-
         function updateSyncHistory() {
             const tbody = document.getElementById('syncHistoryBody');
             if (!tbody) return;
+            
+            if (syncHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Belum ada riwayat sinkronisasi</td></tr>';
+                return;
+            }
             
             tbody.innerHTML = syncHistory.map(record => `
                 <tr>
@@ -1359,7 +1392,6 @@
                         </span>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-900">${record.records}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">${record.duration}</td>
                 </tr>
             `).join('');
         }
@@ -1367,10 +1399,11 @@
         // Data Loading Functions
         async function loadDashboardData() {
             try {
-                const [incomeData, expenseData, memberData] = await Promise.all([
+                const [incomeData, expenseData, memberData, donationData] = await Promise.all([
                     readSheet('income'),
                     readSheet('expenses'),
-                    readSheet('members')
+                    readSheet('members'),
+                    readSheet('donations')
                 ]);
                 
                 // Calculate totals
@@ -1379,6 +1412,7 @@
                 
                 const monthlyIncome = incomeData
                     .filter(row => {
+                        if (!row[0]) return false;
                         const date = new Date(row[0]);
                         return date.getMonth() + 1 === currentMonth && date.getFullYear() === currentYear;
                     })
@@ -1386,6 +1420,7 @@
                 
                 const monthlyExpense = expenseData
                     .filter(row => {
+                        if (!row[0]) return false;
                         const date = new Date(row[0]);
                         return date.getMonth() + 1 === currentMonth && date.getFullYear() === currentYear;
                     })
@@ -1393,25 +1428,32 @@
                 
                 const totalIncome = incomeData.reduce((sum, row) => sum + (parseFloat(row[2]) || 0), 0);
                 const totalExpense = expenseData.reduce((sum, row) => sum + (parseFloat(row[2]) || 0), 0);
+                const totalDonations = donationData.reduce((sum, row) => sum + (parseFloat(row[4]) || 0), 0);
                 const balance = totalIncome - totalExpense;
                 
                 const activeMembers = memberData.filter(row => row[5] === 'Active').length;
                 
                 // Update dashboard
-                document.getElementById('dashboardBalance').textContent = formatCurrency(balance);
-                document.getElementById('dashboardIncome').textContent = formatCurrency(monthlyIncome);
-                document.getElementById('dashboardExpense').textContent = formatCurrency(monthlyExpense);
-                document.getElementById('dashboardMembers').textContent = activeMembers;
+                const elements = {
+                    'dashboardBalance': formatCurrency(balance),
+                    'dashboardIncome': formatCurrency(monthlyIncome),
+                    'dashboardExpense': formatCurrency(monthlyExpense),
+                    'dashboardMembers': activeMembers,
+                    'totalJamaah': activeMembers,
+                    'totalDonations': formatCurrency(totalDonations),
+                    'currentBalance': formatCurrency(balance),
+                    'totalActivities': '2' // Static for demo
+                };
                 
-                // Update public stats
-                document.getElementById('totalJamaah').textContent = activeMembers;
-                document.getElementById('totalDonations').textContent = formatCurrency(totalIncome);
-                document.getElementById('currentBalance').textContent = formatCurrency(balance);
+                Object.entries(elements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = value;
+                });
                 
                 // Update timestamps
                 const now = new Date().toLocaleTimeString();
                 ['balanceSheetUpdate', 'incomeSheetUpdate', 'expenseSheetUpdate', 'membersSheetUpdate',
-                 'jamaahLastUpdate', 'donationsLastUpdate', 'balanceLastUpdate'].forEach(id => {
+                 'jamaahLastUpdate', 'donationsLastUpdate', 'balanceLastUpdate', 'activitiesLastUpdate'].forEach(id => {
                     const element = document.getElementById(id);
                     if (element) element.textContent = now;
                 });
@@ -1427,7 +1469,7 @@
                 const tbody = document.getElementById('incomeTableBody');
                 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada data pemasukan</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada data pemasukan</td></tr>';
                     return;
                 }
                 
@@ -1444,21 +1486,13 @@
                                 ${row[6] || 'Pending'}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-sm">
-                            <button onclick="editIncome(${index})" class="text-blue-600 hover:text-blue-800 mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteIncome(${index})" class="text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
                     </tr>
                 `).join('');
                 
             } catch (error) {
                 console.error('Error loading income data:', error);
                 document.getElementById('incomeTableBody').innerHTML = 
-                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">Gagal memuat data pemasukan</td></tr>';
+                    '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Gagal memuat data pemasukan</td></tr>';
             }
         }
 
@@ -1468,7 +1502,7 @@
                 const tbody = document.getElementById('expenseTableBody');
                 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada data pengeluaran</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada data pengeluaran</td></tr>';
                     return;
                 }
                 
@@ -1485,21 +1519,56 @@
                                 ${row[6] || 'Pending'}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-sm">
-                            <button onclick="editExpense(${index})" class="text-blue-600 hover:text-blue-800 mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteExpense(${index})" class="text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
                     </tr>
                 `).join('');
                 
             } catch (error) {
                 console.error('Error loading expense data:', error);
                 document.getElementById('expenseTableBody').innerHTML = 
-                    '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">Gagal memuat data pengeluaran</td></tr>';
+                    '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Gagal memuat data pengeluaran</td></tr>';
+            }
+        }
+
+        async function loadDonationsData() {
+            try {
+                const data = await readSheet('donations');
+                const tbody = document.getElementById('donationsTableBody');
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">Tidak ada data donasi</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map((row, index) => `
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-mono text-gray-900">${row[0] || '-'}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${row[1] || '-'}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${row[3] || '-'}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-emerald-600">${formatCurrency(parseFloat(row[4]) || 0)}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${row[6] || '-'}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${
+                                row[7] === 'Verified' ? 'bg-green-100 text-green-800' : 
+                                row[7] === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                            }">
+                                ${row[7] || 'Pending'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <button onclick="verifyDonation('${row[0]}')" class="text-green-600 hover:text-green-800 mr-2" title="Verifikasi">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button onclick="viewDonationDetails('${row[0]}')" class="text-blue-600 hover:text-blue-800" title="Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading donations data:', error);
+                document.getElementById('donationsTableBody').innerHTML = 
+                    '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500">Gagal memuat data donasi</td></tr>';
             }
         }
 
@@ -1559,14 +1628,14 @@
         // Form Handlers
         async function addIncome(formData) {
             try {
-                showLoading('Menyimpan pemasukan ke spreadsheet...');
+                showLoading('Menyimpan pemasukan ke Google Sheets...');
                 
                 const newRow = [
                     formData.date,
                     formData.category,
                     formData.amount,
                     formData.source,
-                    formData.description,
+                    formData.description || '',
                     new Date().toISOString(),
                     'Verified'
                 ];
@@ -1574,7 +1643,7 @@
                 await appendSheet('income', [newRow]);
                 
                 hideLoading();
-                showSuccess('Pemasukan berhasil disimpan ke spreadsheet!');
+                showSuccess('Pemasukan berhasil disimpan ke Google Sheets!');
                 
                 // Refresh data
                 loadIncomeData();
@@ -1588,14 +1657,14 @@
 
         async function addExpense(formData) {
             try {
-                showLoading('Menyimpan pengeluaran ke spreadsheet...');
+                showLoading('Menyimpan pengeluaran ke Google Sheets...');
                 
                 const newRow = [
                     formData.date,
                     formData.category,
                     formData.amount,
                     formData.recipient,
-                    formData.description,
+                    formData.description || '',
                     new Date().toISOString(),
                     'Paid'
                 ];
@@ -1603,7 +1672,7 @@
                 await appendSheet('expenses', [newRow]);
                 
                 hideLoading();
-                showSuccess('Pengeluaran berhasil disimpan ke spreadsheet!');
+                showSuccess('Pengeluaran berhasil disimpan ke Google Sheets!');
                 
                 // Refresh data
                 loadExpenseData();
@@ -1617,7 +1686,7 @@
 
         async function addDonation(formData) {
             try {
-                showLoading('Menyimpan donasi ke spreadsheet...');
+                showLoading('Menyimpan donasi ke Google Sheets...');
                 
                 const donationId = 'DN' + Date.now();
                 const newRow = [
@@ -1626,7 +1695,7 @@
                     formData.phone,
                     formData.type,
                     formData.amount,
-                    formData.message,
+                    formData.message || '',
                     formData.paymentMethod,
                     'Pending',
                     new Date().toISOString()
@@ -1635,7 +1704,7 @@
                 await appendSheet('donations', [newRow]);
                 
                 hideLoading();
-                showSuccess(`Terima kasih ${formData.name}! Donasi Anda sebesar ${formatCurrency(formData.amount)} telah tercatat di spreadsheet. ID Donasi: ${donationId}`);
+                showSuccess(`Terima kasih ${formData.name}! Donasi Anda sebesar ${formatCurrency(formData.amount)} telah tercatat di Google Sheets. ID Donasi: ${donationId}`);
                 
                 // Refresh data
                 loadDashboardData();
@@ -1822,8 +1891,8 @@
                 case 'expense':
                     loadExpenseData();
                     break;
-                case 'spreadsheet':
-                    loadSpreadsheetInfo();
+                case 'donations':
+                    loadDonationsData();
                     break;
             }
         }
@@ -1873,117 +1942,16 @@
             }
         }
 
-        async function loadSpreadsheetInfo() {
-            try {
-                if (dbConfig.isDemoMode) {
-                    document.getElementById('currentSpreadsheetId').textContent = 'Demo Mode';
-                    document.getElementById('currentConnectionStatus').textContent = 'Demo Mode Active';
-                    document.getElementById('totalSheets').textContent = Object.keys(REQUIRED_SHEETS).length;
-                    document.getElementById('totalRecords').textContent = Object.values(demoData).reduce((sum, arr) => sum + arr.length, 0);
-                    document.getElementById('dataSize').textContent = '~50KB (Demo)';
-                    return;
-                }
-                
-                document.getElementById('currentSpreadsheetId').textContent = dbConfig.spreadsheetId || '-';
-                document.getElementById('currentConnectionStatus').textContent = dbConfig.isConnected ? 'Connected' : 'Disconnected';
-                document.getElementById('lastSyncTime').textContent = syncHistory.length > 0 ? formatDateTime(syncHistory[0].time) : '-';
-                
-                // Load sheet structure
-                const sheetStructure = document.getElementById('sheetStructure');
-                sheetStructure.innerHTML = Object.entries(REQUIRED_SHEETS).map(([sheetName, columns]) => `
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h5 class="font-semibold text-gray-800 mb-2">${sheetName}</h5>
-                        <div class="text-xs text-gray-600 space-y-1">
-                            ${columns.map(col => `<p>• ${col}</p>`).join('')}
-                        </div>
-                        <div class="mt-2">
-                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                                ${columns.length} kolom
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Error loading spreadsheet info:', error);
-            }
+        function refreshDonations() {
+            loadDonationsData();
         }
 
-        async function validateSheetStructure() {
-            showLoading('Memvalidasi struktur sheet...');
-            
-            try {
-                const results = [];
-                
-                for (const [sheetName, requiredColumns] of Object.entries(REQUIRED_SHEETS)) {
-                    try {
-                        const data = await readSheet(sheetName, 'A1:Z1');
-                        const actualColumns = data[0] || [];
-                        
-                        const missing = requiredColumns.filter(col => !actualColumns.includes(col));
-                        const extra = actualColumns.filter(col => !requiredColumns.includes(col));
-                        
-                        results.push({
-                            sheet: sheetName,
-                            status: missing.length === 0 ? 'Valid' : 'Invalid',
-                            missing: missing,
-                            extra: extra
-                        });
-                    } catch (error) {
-                        results.push({
-                            sheet: sheetName,
-                            status: 'Missing',
-                            error: error.message
-                        });
-                    }
-                }
-                
-                hideLoading();
-                
-                const validSheets = results.filter(r => r.status === 'Valid').length;
-                const totalSheets = results.length;
-                
-                if (validSheets === totalSheets) {
-                    showSuccess(`Validasi berhasil! Semua ${totalSheets} sheet memiliki struktur yang benar.`);
-                } else {
-                    showError(`Validasi gagal! ${validSheets}/${totalSheets} sheet valid. Periksa struktur sheet yang bermasalah.`);
-                }
-                
-            } catch (error) {
-                hideLoading();
-                showError(`Gagal memvalidasi struktur: ${error.message}`);
-            }
+        function verifyDonation(donationId) {
+            showSuccess(`Donasi ${donationId} telah diverifikasi (fitur demo)`);
         }
 
-        async function createMissingSheets() {
-            showError('Fitur ini memerlukan Google Apps Script atau akses write ke Sheets API. Silakan buat sheet secara manual di Google Sheets.');
-        }
-
-        function backupData() {
-            showLoading('Mempersiapkan backup...');
-            
-            setTimeout(() => {
-                const backupData = {
-                    timestamp: new Date().toISOString(),
-                    spreadsheetId: dbConfig.spreadsheetId,
-                    demoMode: dbConfig.isDemoMode,
-                    data: dbConfig.isDemoMode ? demoData : 'Use Google Sheets export feature',
-                    syncHistory: syncHistory
-                };
-                
-                const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `masjid-backup-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                hideLoading();
-                showSuccess('Backup berhasil diunduh!');
-            }, 1000);
+        function viewDonationDetails(donationId) {
+            showSuccess(`Menampilkan detail donasi ${donationId} (fitur demo)`);
         }
 
         // Initialize Application
@@ -2009,7 +1977,7 @@
                 if (!document.getElementById('adminPanel').classList.contains('hidden')) return;
                 loadDashboardData();
                 loadActivitiesData();
-            }, 60000); // Refresh every minute
+            }, 300000); // Refresh every 5 minutes
         }
 
         // Event Listeners
@@ -2017,6 +1985,34 @@
             // Show database configuration modal on startup
             document.getElementById('dbConfigModal').classList.remove('hidden');
             
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96fd7853e697fd2d',t:'MTc1NTMxMTAxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+            // Database configuration form
+            document.getElementById('dbConfigForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
+                
+                if (!spreadsheetId || !apiKey) {
+                    showError('Harap isi semua field yang diperlukan');
+                    return;
+                }
+                
+                showLoading('Menyimpan konfigurasi dan menguji koneksi...');
+                
+                try {
+                    // Test connection
+                    const response = await fetch(`${SHEETS_API_BASE}/${spreadsheetId}?key=${apiKey}`);
+                    
+                    if (response.ok) {
+                        dbConfig.spreadsheetId = spreadsheetId;
+                        dbConfig.apiKey = apiKey;
+                        dbConfig.isConnected = true;
+                        dbConfig.isDemoMode = false;
+                        
+                        // Save to localStorage
+                        localStorage.setItem('mosqueDbConfig', JSON.stringify({
+                            spreadsheetId: spreadsheetId,
+                            apiKey: apiKey
+                        }));
+                        
+                        hide<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96fd9f37b133ce45',t:'MTc1NTMxMjYwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
